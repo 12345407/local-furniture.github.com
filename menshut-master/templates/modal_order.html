@@ -9,7 +9,7 @@
 
                         <div class="card mb-4">
                             <img class="card-img-top img-fluid"
-                                 src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
+                                src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
                             <div class="card-body">
                                 <h4 class="card-title">{{product.pName}}</h4>
                             </div>
@@ -38,6 +38,7 @@
                                         {{render_field(form.quantity, class_="form-control")}}
                                     </div>
 
+
                                     <div class="form-group">
                                         {{render_field(form.order_place, class_="form-control")}}
                                     </div>
@@ -58,11 +59,11 @@
 </div>
 
 <script>
-$(document).ready(function(){
-    $(".order_{{product.id}}").click(function(){
-        $(".order_modal{{product.id}}").modal({backdrop: true});
+    $(document).ready(function () {
+        $(".order_{{product.id}}").click(function () {
+            $(".order_modal{{product.id}}").modal({ backdrop: true });
+        });
     });
-});
 
 
 

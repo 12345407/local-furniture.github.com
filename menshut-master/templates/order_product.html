@@ -18,7 +18,7 @@
                 <div class="col-lg-6">
                     <div class="card mt-4">
                         <img class="card-img-top img-fluid"
-                             src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
+                            src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
                     </div>
                 </div>
                 <!-- /.card -->
@@ -41,6 +41,8 @@
                                     {{render_field(form.quantity, class_="form-control")}}
                                 </div>
 
+                                <h4>৳{{product.price}}</h4>
+
                                 <div class="form-group">
                                     {{render_field(form.order_place, class_="form-control")}}
                                 </div>
@@ -53,7 +55,7 @@
                 <!-- /.card -->
 
             </div>
-             <!--  
+            <!--  
             {% if x == '' %}
             <h2 class="mb-4">No recommendation found</h2>
             {% else%}
