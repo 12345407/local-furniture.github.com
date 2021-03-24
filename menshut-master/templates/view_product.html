@@ -20,9 +20,19 @@
                         <img class="card-img-top img-fluid"
                             src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
                     </div>
+                    <div class="card card-outline-secondary my-2 card-body mb-4">
+                        <h4 class="card-text">{{ product.pName}}</h4>
+                        <span class="text-warning">&#9733; &#9733; &#9733; &#9733; &#9734;</span>
+                        <p class="card-text">No cost EMI ${{'%0.2f'| format(product.price / 9|float)}}/ month.<a
+                                href="####">View Plans</a>
+                        </p>
+                        <p class="card-text">{{ product.description}}</p>
+
+                    </div>
+
                 </div>
                 <!-- /.card -->
-                <div class="col-lg-6">
+                <div class="col-lg-5">
                     <div class="card card-outline-secondary my-4">
                         <div class="card-header">
                             Product Details
@@ -34,7 +44,8 @@
                             {% if 'logged_in' in session: %}
                             <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order Now</a>
                             {% else %}
-                            <h4>Login for order!</h4>
+
+                            <a href="/login" class="btn btn-success">Order Now</a>
                             {% endif %}
 
 
@@ -61,7 +72,7 @@
                         <div class="card-body">
                             <h5><a class="card-title" href="/{{product.category}}?view={{product.id}}">{{
                                     product.pName}}</a></h5>
-                            <h4>৳{{product.price}}</h4>
+                            <h4>${{product.price}}</h4>
                         </div>
                     </div>
                     <!-- /.card -->

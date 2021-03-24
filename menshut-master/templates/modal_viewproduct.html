@@ -9,7 +9,7 @@
 
                         <div class="card mb-4">
                             <img class="card-img-top img-fluid"
-                                 src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
+                                src="static/image/product/{{product.category}}/{{product.picture}}" alt="">
                         </div>
                         <!-- /.card -->
                     </div>
@@ -28,7 +28,7 @@
                                 </div>
                                 <hr>
                                 <button type="button" class="btn btn-success order_{{product.id}}"
-                                        data-dismiss="modal">Order Now
+                                    data-dismiss="modal">Order Now
                                 </button>
                             </div>
                         </div>
@@ -62,10 +62,10 @@
 </div>
 
 <script>
-$(document).ready(function(){
-    $(".id_{{product.id}}").click(function(){
-        $(".modal{{product.id}}").modal({backdrop: true});
+    $(document).ready(function () {
+        $(".id_{{product.id}}").click(function () {
+            $(".modal{{product.id}}").modal({ backdrop: true });
+        });
     });
-});
 
 </script>
