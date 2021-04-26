@@ -27,6 +27,15 @@
                                 href="####">View Plans</a>
                         </p>
                         <p class="card-text">{{ product.description}}</p>
+                        <div class="row" id="Add">
+                            <ul>
+                                <li><a href="#" title="Add to Favorite"><i class="fa fa-heart"></i></a></li>
+                                <li><a href="#" title="Add to Compare"><i class="fa fa-refresh"></i></a></li>
+                                <li><a href="#" title="Quick View"><i class="fa fa-search"></i></a></li>
+                            </ul>
+                        </div>
+
+
 
                     </div>
 
@@ -41,12 +50,33 @@
                             <h3 class="card-title">{{ product.pName}}</h3>
                             <h4>${{ product.price}}</h4>
                             <p class="card-text">{{ product.description}}</p>
+
+
+                            <form method="post" action="/add">
+                                <div class="row card-body">
+                                    <div class="add-to-cart">
+                                        <input type="hidden" name="pCode" value="{{ product.pCode }}" />
+                                        <input type="text" class="product-quantity" name="quantity" value="1"
+                                            size="2" />
+                                        <input type="submit" value="Add to Cart" class="btn-primary" />
+                                    </div>
+                                </div>
+                            </form>
+
+
+
+
                             {% if 'logged_in' in session: %}
-                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order Now</a>
+                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order
+                                Now</a>
+
+
                             {% else %}
 
                             <a href="/login" class="btn btn-success">Order Now</a>
                             {% endif %}
+
+
 
 
                         </div>
@@ -90,5 +120,40 @@
     {% include 'product.html' %}
 
 </div>
+<style>
+    #Add ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        right: -100px;
+        top: 30px;
+        transition: .6s;
+        -webkit-transition: .6s;
+    }
+
+    #Add ul {
+        right: 15px;
+    }
+
+    #Add a {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        padding-top: 7px;
+        font-size: 15px;
+        text-align: center;
+        background: #ff007d;
+        margin-bottom: 7px;
+        border-radius: 50%;
+        line-height: 3px;
+        color: #fff;
+    }
+
+    #Add a:hover {
+        color: rgb(236, 223, 39);
+        background: #e50663;
+    }
+</style>
 <!-- /.container -->
 {% endblock %}

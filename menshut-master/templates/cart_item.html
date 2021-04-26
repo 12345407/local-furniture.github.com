@@ -1,0 +1,98 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <p>
+        <h2>Shopping Cart using Python Flask MySQL</h2>
+        </p>
+        <div class="col-sm-12">
+            <div>
+                <!-- {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class=flashes>
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %} -->
+            </div>
+            {% if 'cart_item' in session %}
+            <p><a id="btnEmpty" href="{{ url_for('.empty_cart') }}" class="btn btn-danger">Empty Cart</a></p>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th class="text-center">Unit Price</th>
+                        <th class="text-center">Price</th>
+                        <th> </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, val in session['cart_item'].items() %}
+                    {% set quantity = session['cart_item'][key]['quantity'] %}
+                    {% set price = session['cart_item'][key]['price'] %}
+                    {% set item_price = session['cart_item'][key]['total_price'] %}
+                    <tr>
+                        <td class="col-sm-8 col-md-6">
+                            <div class="media">
+                                <a class="thumbnail pull-left" href="#"> <img class="media-object"
+                                        src="/static/image/product/{{ session['cart_item'][key]['picture'] }}"
+                                        style="width: 72px; height: 72px;"> </a>
+                                <div class="media-body">
+                                    <h4 class="media-heading"> <a href="/{{product.category}}?view={{product.id}}">{{
+                                            session['cart_item'][key]['pName'] }}</a>
+                                    </h4>
+
+                                    <span>Status: </span><span class="text-success"><strong>In Stock</strong></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="col-sm-1 col-md-1" style="text-align: center">
+                            <input type="email" class="form-control" value="{{ quantity }}">
+                        </td>
+                        <td class="col-sm-1 col-md-1 text-center"><strong>${{ price }} </strong></td>
+                        <td class="col-sm-1 col-md-1 text-center"><strong>${{ item_price }} </strong></td>
+                        <td class="col-sm-1 col-md-1">
+                            <a href="{{ url_for('.delete_product', pCode=session['cart_item'][key]['pCode']) }}"
+                                class="btn btn-danger">
+                                <span class="glyphicon glyphicon-remove"></span> Remove
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="4">
+                            <h5>Total Quantity</h5>
+                        </td>
+                        <td class="text-right">
+                            <h5><strong>{{ session['all_total_quantity'] }}</strong></h5>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <h3>Total</h3>
+                        </td>
+                        <td colspan="2" class="text-right">
+                            <h3><strong>$ {{ session['all_total_price'] }}</strong></h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <a href="/{{product.category}}?view={{product.id}}" class="btn btn-success">Continue
+                                Shopping</a>
+                        </td>
+                        <td>
+                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Checkout</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% else: %}
+            <div class="no-records">There is nothing on your cart!</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock body %}

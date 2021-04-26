@@ -47,10 +47,14 @@
                 </a>
             </div>
             <h3><a href="/tshirt">T-Shirt</a></h3>
+
             <div class="row">
+
                 {% for product in tshirt %}
                 {% if product.category == 'tshirt' %}
+
                 <div class="col-lg-3 col-md-4 col-sm-6">
+
                     <div class="card mb-4">
                         <a href="/{{product.category}}?view={{product.id}}">
                             <div class="card-img-top id_{{product.id}}"
@@ -61,7 +65,15 @@
                             <h5><a class="card-title" href="/{{product.category}}?view={{product.id}}">{{
                                     product.pName}}</a></h5>
                             <h4>${{product.price}}</h4>
-                            <span class="text-warning"></span>
+                            <span class="text-warning">&#9733; &#9733; &#9733; &#9733; &#9734;</span>
+
+
+
+
+
+                        </div>
+                        <div class="row">
+
                         </div>
                     </div>
                     <!-- /.card -->
