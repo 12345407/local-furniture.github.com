@@ -16,10 +16,8 @@
 <body style="background-color:aliceblue; margin-top: 57px">
     {% include 'includes/_navbar.html' %}
     {% include 'includes/menu.html' %}
+    {% block body %} {% endblock %}
 
-    <div class="container">
-        {% block body %} {% endblock %}
-    </div>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"></script>
 </body>
 {% include 'includes/_footer.html' %}
