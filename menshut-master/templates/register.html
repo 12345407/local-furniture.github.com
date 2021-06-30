@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+{% include 'includes/_flashmsg.html' %}
 <div class="jumbotron">
     <h2 style="text-align: center; color: #206aaa;">Sign Up Form</h2>
     {% from "includes/_formhelpers.html" import render_field %}
@@ -18,11 +19,18 @@
             {{render_field(form.password, class="form-control")}}
         </div>
         <div class="form-group">
+            {{render_field(form.cnf_password, class="form-control")}}
+        </div>
+        <div class="form-group">
             {{render_field(form.mobile, class="form-control")}}
         </div>
         <p>
             <input type="submit" class="btn btn-primary" value="Sign Up">
+
         </p>
+        <div class="footer">
+            <h6>Already a member? <a href="/login">Login here</a></h6>
+        </div>
     </form>
 </div>
 {% endblock %}

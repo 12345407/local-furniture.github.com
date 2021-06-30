@@ -1,4 +1,8 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
+from flask import *
+from flask_mail import *
+from random import *
+import requests
+import json
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField
 from passlib.hash import sha256_crypt
@@ -6,7 +10,7 @@ from functools import wraps
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import timeit
 import datetime
-from flask_mail import Mail, Message
+
 import os
 from wtforms.fields.html5 import EmailField
 
@@ -26,6 +30,16 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 # Initialize the app for use with this MySQL class
 mysql.init_app(app)
+
+# config mail
+mail = Mail(app)
+app.config["MAIL_SERVER"] = 'smtp.gmail.com'
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USERNAME"] = 'prouser.rahul.01@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ichxeivqdecfksoy'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 
 def is_logged_in(f):
@@ -147,8 +161,8 @@ def index():
 
 
 class LoginForm(Form):  # Create Login Form
-    username = StringField('', [validators.length(min=1)],
-                           render_kw={'autofocus': True, 'placeholder': 'Username'})
+    email = EmailField('', [validators.DataRequired(), validators.Email(), validators.length(min=4, max=25)],
+                       render_kw={'placeholder': 'Email'})
     password = PasswordField('', [validators.length(min=3)],
                              render_kw={'placeholder': 'Password'})
 
@@ -160,7 +174,7 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         # GEt user form
-        username = form.username.data
+        email = form.email.data
         # password_candidate = request.form['password']
         password_candidate = form.password.data
 
@@ -169,25 +183,34 @@ def login():
 
         # Get user by username
         result = cur.execute(
-            "SELECT * FROM users WHERE username=%s", [username])
+            "SELECT * FROM users WHERE email=%s", [email])
 
         if result > 0:
             # Get stored value
             data = cur.fetchone()
+            username = data['username']
             password = data['password']
             uid = data['id']
             name = data['name']
+            code = data['code']
+            status = data['status']
 
             # Compare password
             if sha256_crypt.verify(password_candidate, password):
                 # passed
-                session['logged_in'] = True
-                session['uid'] = uid
-                session['s_name'] = name
-                x = '1'
-                cur.execute("UPDATE users SET online=%s WHERE id=%s", (x, uid))
+                session['email'] = email
+                if status == 'varified':
+                    session['logged_in'] = True
+                    session['uid'] = uid
+                    session['s_name'] = name
+                    x = '1'
+                    cur.execute(
+                        "UPDATE users SET online=%s WHERE id=%s", (x, uid))
 
-                return redirect(url_for('index'))
+                    return redirect(url_for('index'))
+                flash(
+                    f"It's look like you haven't still verify your email - {email}")
+                return redirect(url_for("validate"))
 
             else:
                 flash('Incorrect password', 'danger')
@@ -200,7 +223,7 @@ def login():
             return render_template('login.html', form=form)
     return render_template('login.html', form=form)
 
-
+# User Logout
 @app.route('/out')
 def logout():
     if 'uid' in session:
@@ -214,7 +237,94 @@ def logout():
         return redirect(url_for('index'))
     return redirect(url_for('login'))
 
+# Forgot password form
 
+
+class NewpasswordForm(Form):
+
+    newpassword = PasswordField('', [validators.length(min=3), validators.EqualTo('cnf_newpassword', message='Passwords must match')],
+                                render_kw={'placeholder': 'Password'})
+    cnf_newpassword = PasswordField('', [validators.length(min=3)],
+                                    render_kw={'placeholder': 'Confirm Password'})
+
+
+class PasswordemailForm(Form):
+    email = EmailField('', [validators.DataRequired(), validators.Email(), validators.length(min=4, max=25)],
+                       render_kw={'placeholder': 'Email'})
+
+
+# forgot password email
+@app.route('/password_email', methods=['GET', 'POST'])
+def forgot_email():
+    form = PasswordemailForm(request.form)
+    if request.method == 'POST' and form.validate():
+        email = form.email.data
+        code = randint(000000, 999999)
+        # Create Cursor
+        cur = mysql.connection.cursor()
+        email_check = cur.execute(
+            "SELECT * FROM users WHERE email =%s", [email])
+        session['email'] = email
+        if email_check > 0:
+            insert_data = cur.execute(
+                "INSERT INTO users(code) VALUES(%s)", [code])
+
+            # Commit cursor
+            mysql.connection.commit()
+
+            # Close Connection
+            cur.close()
+
+            msg = Message(
+                'OTP', sender='jharahul1195@gmail.com', recipients=[email])
+            msg.body = str(code)
+            mail.send(msg)
+            info = flash('Verification Requird', 'success')
+
+        return redirect(url_for('verifyotp'))
+    return render_template('forgot_password.html', form=form)
+
+# Reet Password OTP verification
+@app.route('/Verify_ otp', methods=['GET', 'POST'])
+def verifyotp():
+    form = ValidationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user_otp = form.otp_field.data
+        cur = mysql.connection.cursor()
+        code_check = cur.execute(
+            "SELECT * FROM users WHERE code =%s", [user_otp])
+
+        if code_check > 0:
+            code = 0
+            update_otp = cur.execute("UPDATE users SET code=%s WHERE code=%s",
+                                     (code, user_otp))
+            flash("varification successful", "success")
+            return redirect(url_for("newpassword"))
+
+        flash("failure, OTP does not match", 'danger')
+        return redirect(url_for('verify_otp'))
+
+    return render_template('Verify.html', form=form)
+
+
+# Forgot password
+@app.route('/newpassword', methods=['GET', 'POST'])
+def newpassword():
+    form = NewpasswordForm(request.form)
+    if request.method == 'POST' and form.validate():
+        newpassword = sha256_crypt.encrypt(str(form.newpassword.data))
+        cnf_newpassword = form.cnf_newpassword.data
+        email = session['email']
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE users SET password=%s WHERE email=%s",
+                    (newpassword, email))
+        flash("varification successful", "success")
+        return redirect(url_for("login"))
+
+    return render_template('new_password.html', form=form)
+
+
+# User registration form
 class RegisterForm(Form):
     name = StringField('', [validators.length(min=3, max=50)],
                        render_kw={'autofocus': True, 'placeholder': 'Full Name'})
@@ -222,12 +332,44 @@ class RegisterForm(Form):
                            'placeholder': 'Username'})
     email = EmailField('', [validators.DataRequired(), validators.Email(), validators.length(min=4, max=25)],
                        render_kw={'placeholder': 'Email'})
-    password = PasswordField('', [validators.length(min=3)],
+    password = PasswordField('', [validators.length(min=3), validators.EqualTo('cnf_password', message='Passwords must match')],
                              render_kw={'placeholder': 'Password'})
-    mobile = StringField('', [validators.length(min=11, max=15)], render_kw={
+    cnf_password = PasswordField('', [validators.length(min=3)],
+                                 render_kw={'placeholder': 'Confirm Password'})
+    mobile = StringField('', [validators.length(min=10, max=11)], render_kw={
                          'placeholder': 'Mobile'})
 
+# OTP validation form
 
+
+class ValidationForm(Form):
+    otp_field = PasswordField('Please Enter OTP Number')
+
+# OTP validation
+@app.route('/validate', methods=['GET', 'POST'])
+def validate():
+    form = ValidationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user_otp = form.otp_field.data
+        cur = mysql.connection.cursor()
+        code_check = cur.execute(
+            "SELECT * FROM users WHERE code =%s", [user_otp])
+
+        if code_check > 0:
+            session['info'] = ""
+
+            code = 0
+            status = 'varified'
+            update_otp = cur.execute("UPDATE users SET code=%s, status=%s WHERE code=%s",
+                                     (code, status, user_otp))
+            flash("varification successful", "success")
+            return redirect(url_for("login"))
+
+        flash("failure, OTP does not match", 'danger')
+        return redirect(url_for('validate'))
+    return render_template('Verify.html', form=form)
+
+# user registration
 @app.route('/register', methods=['GET', 'POST'])
 @not_logged_in
 def register():
@@ -237,22 +379,47 @@ def register():
         email = form.email.data
         username = form.username.data
         password = sha256_crypt.encrypt(str(form.password.data))
+        cnf_password = form.cnf_password.data
         mobile = form.mobile.data
+        code = randint(000000, 999999)
+        status = 'Not Verified'
 
         # Create Cursor
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users(name, email, username, password, mobile) VALUES(%s, %s, %s, %s, %s)",
-                    (name, email, username, password, mobile))
+        email_check = cur.execute(
+            "SELECT * FROM users WHERE email =%s", [email])
+        mobile_check = cur.execute(
+            "SELECT * FROM users WHERE mobile =%s", [mobile])
 
-        # Commit cursor
-        mysql.connection.commit()
+        if email_check > 0 and mobile_check > 0:
+            flash(f"{email} and {mobile} Already Exist", 'danger')
+            return redirect(url_for('register'))
+        elif mobile_check > 0:
+            flash(f"{mobile} Already Exist", 'danger')
+            return redirect(url_for('register'))
+        elif email_check > 0:
+            flash(f"{email} Already Exist", 'danger')
+            return redirect(url_for('register'))
 
-        # Close Connection
-        cur.close()
+        else:
 
-        flash('You are now registered and can login', 'success')
+            insert_data = cur.execute("INSERT INTO users(name, email, username, password,code, status, mobile) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                                      (name, email, username, password, code, status, mobile))
 
-        return redirect(url_for('index'))
+            # Commit cursor
+            mysql.connection.commit()
+
+            # Close Connection
+            cur.close()
+
+            msg = Message(
+                'OTP', sender='jharahul1195@gmail.com', recipients=[email])
+            msg.body = str(code)
+            mail.send(msg)
+            flash('Verification Requird', 'success')
+            session['email'] = email
+        return redirect(url_for('validate'))
+
     return render_template('register.html', form=form)
 
 
