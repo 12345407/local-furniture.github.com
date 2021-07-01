@@ -266,8 +266,10 @@ def forgot_email():
             "SELECT * FROM users WHERE email =%s", [email])
         session['email'] = email
         if email_check > 0:
+
             insert_data = cur.execute(
-                "INSERT INTO users(code) VALUES(%s)", [code])
+                "UPDATE users SET code=%s WHERE email=%s",
+                (code, email))
 
             # Commit cursor
             mysql.connection.commit()
@@ -276,12 +278,13 @@ def forgot_email():
             cur.close()
 
             msg = Message(
-                'OTP', sender='jharahul1195@gmail.com', recipients=[email])
+                'OTP', sender='prouser.rahul.01@gmail.com', recipients=[email])
             msg.body = str(code)
             mail.send(msg)
             info = flash('Verification Requird', 'success')
-
-        return redirect(url_for('verifyotp'))
+            return redirect(url_for('verifyotp'))
+        else:
+            flash('Email does not Exist', "danger")
     return render_template('forgot_password.html', form=form)
 
 # Reet Password OTP verification
