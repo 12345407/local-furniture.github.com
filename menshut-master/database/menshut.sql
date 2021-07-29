@@ -840,6 +840,15 @@ CREATE TABLE IF NOT EXISTS `product_view` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE = MyISAM AUTO_INCREMENT = 9 DEFAULT CHARSET = latin1;
+-- Cart item
+DROP TABLE IF EXISTS `cart_product`;
+CREATE TABLE IF NOT EXISTS `cart_product` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pName` varchar(111) NOT NULL,
+  `price` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE = MyISAM AUTO_INCREMENT = 9 DEFAULT CHARSET = latin1;
+--
 --
 -- Dumping data for table `product_view`
 --

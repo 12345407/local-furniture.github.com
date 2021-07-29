@@ -35,6 +35,10 @@
                         <p class="card-text">{{ product.description}}</p>
                         {% if 'logged_in' in session: %}
                         <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order Now</a>
+                        <a href="/cart" class="btn btn-primary">Add To Basket <i class="fa fa-cart-plus"
+                                aria-hidden="true"></i></a>
+
+
                         {% else %}
 
                         <a href="/login" class="btn btn-success">Order Now</a>

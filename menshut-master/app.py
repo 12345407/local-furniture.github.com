@@ -824,8 +824,38 @@ def orders():
     order_rows = curso.execute("SELECT * FROM orders")
     result = curso.fetchall()
     users_rows = curso.execute("SELECT * FROM users")
+    cart_item = curso.execute("SELECT * FROM cart_product")
     return render_template('pages/all_orders.html', result=result, row=num_rows, order_rows=order_rows,
-                           users_rows=users_rows)
+                           users_rows=users_rows, cart_item=cart_item)
+
+
+@app.route('/cart')
+def cart():
+    if 'id' in request.args:
+        product_id = request.args['id']
+        curso = mysql.connection.cursor()
+        res = curso.execute(
+            "SELECT * FROM products WHERE id=%s", (product_id,))
+        if res > 0:
+            data = res.fetchone()
+            id = data['id']
+            name = data['pName']
+            price = data['price']
+
+            # Create Cursor
+            cur = mysql.connection.cursor()
+            exe = curso.execute(
+                "INSERT INTO cart_product(id, pName, price)"
+                "VALUES(%s, %s, %s)",
+                (id, name, price))
+            flash('Updated Successfull', 'success')
+            return redirect(url_for('cart_product'))
+
+        else:
+            flash('Something Went Wrong', 'danger')
+            return redirect(url_for('admin_add_product'))
+    flash("Something went wrong", 'danger')
+    return render_template('view_product.html')
 
 
 @app.route('/users')
